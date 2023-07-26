@@ -1,0 +1,52 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cartolaapi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cartolaapi
+  template:
+    metadata:
+      labels:
+        app: cartolaapi
+    spec:
+      serviceAccountName: default
+      terminationGracePeriodSeconds: 5
+      replicas: 2
+      containers:
+        - name: cartola
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - all
+            privileged: false
+            readOnlyRootFilesystem: true
+          imagePullPolicy: Never
+          image: cartolaapi:latest
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cartolaapi
+spec:
+  type: ClusterIP
+  selector:
+    app: cartolaapi
+  ports:
+    - name: TCP
+      port: 8080
+      targetPort: 8080

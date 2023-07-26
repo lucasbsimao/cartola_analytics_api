@@ -1,0 +1,17 @@
+FROM gradle:7.6.2-jdk11-alpine as builder
+
+WORKDIR /app
+
+COPY . .
+
+RUN gradle build
+
+FROM openjdk:11-jre-slim
+
+EXPOSE 8080
+
+RUN mkdir /app
+
+COPY --from=builder /app/build/libs/*.jar /app/cartola_analytics_api.jar
+
+CMD java /app/cartola_analytics_api
